@@ -1,0 +1,213 @@
+As duas alternativas que escolhi para solucionar esse problema  sao baseadas em dois conceitos:
+
+1 - Banco de dados relacionais (Modelo relacional e EAV(Entity - Attribute - Value)).
+2 - Banco de dados NoSql orientado a documentos (Nao-relacionais).
+
+Solucao 1:
+
+ Envolve a criacao de tabelas com colunas fixas (nos quais representariam os atributos de uma entidade). Por exemplo, a criacao da entidade "beer" seria uma tabela principal no qual todas as outras entidades relacionadas a ela seriam tambem representadas por outras tabelas com os seus respectivos atributos.
+
+Modelo criado para ilustrar esse relacionamento:
+
+CREATE TABLE public.beer
+(
+    id bigint NOT NULL,
+    name text COLLATE pg_catalog."default",
+    tagline text COLLATE pg_catalog."default",
+    first_brewed date,
+    description text COLLATE pg_catalog."default",
+    image_url text COLLATE pg_catalog."default",
+    abv double precision,
+    ibu integer,
+    target_fg integer,
+    target_og integer,
+    ebc integer,
+    srm integer,
+    ph double precision,
+    attenuation_level integer,
+    volume_id integer,
+    boil_volume_id integer,
+    brewers_tips text COLLATE pg_catalog."default",
+    contributed_by text COLLATE pg_catalog."default",
+    CONSTRAINT beer_pkey PRIMARY KEY (id),
+    CONSTRAINT boil_volume_fkey FOREIGN KEY (boil_volume_id)
+        REFERENCES public.boil_volume (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION,
+    CONSTRAINT volume_id_fkey FOREIGN KEY (volume_id)
+        REFERENCES public.volume (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+CREATE TABLE public.boil_volume
+(
+    id integer NOT NULL,
+    value text COLLATE pg_catalog."default",
+    unit text COLLATE pg_catalog."default",
+    CONSTRAINT boil_volume_pkey PRIMARY KEY (id)
+)
+
+CREATE TABLE public.method
+(
+    mash_temp integer,
+    id integer NOT NULL,
+    fermentation integer,
+    twist text COLLATE pg_catalog."default",
+    CONSTRAINT method_pkey PRIMARY KEY (id)
+)
+
+CREATE TABLE public.method_mash_temp
+(
+    temp text COLLATE pg_catalog."default",
+    duration text COLLATE pg_catalog."default",
+    id integer NOT NULL,
+    method_id integer NOT NULL,
+    CONSTRAINT method_mash_temp_pkey PRIMARY KEY (id),
+    CONSTRAINT method_fk FOREIGN KEY (method_id)
+        REFERENCES public.method (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE NO ACTION
+)
+
+Como voce pode visualizar, atraves do esquema de dados do catalogo de cervejas passado, criei algumas tabelas e relacionamentos entre as mesmas, utilizando foreign keys.  Tipos de relacionamento utilizados sao: One to One e One to Many.
+
+Outra abordagem interessante seria o uso do model EAV (Entity - Attribute - Value), no qual criam-se tabelas com um numero menor de colunas, geralmente definindo atributos e seus valores. Por exemplo, a tabela 'method_mash_temp' sob esse modelo seria desenvolvido sob a estrutura abaixo:
+
+Tabela: method_mash_temp
+
+Columns : id | beer_id | attribute    | value
+ 
+Row1:     1  |1       | mash_temp    |  9
+Row2:     2  |1       | fermentation |  12
+Row3:     3  |1       | twist        |  9
+Row4:     4  |2       | mash_temp    |  9
+Row5:     5  |2       | fermentation |  9
+
+Como pode-se notar, nao sao criados colunas fixas com o nome dos atributos. Em vez disso, cada linha da tabela corresponde a um valor de um atributo daquele objeto beer, permitindo criar colunas dinamicamente sem precisar alterar a estrutura da tabela.
+
+Vantagens: Permite multiplos usuarios acessarem um banco de dados simultaneamente. Contem mecanismos de bloqueio e gerenciamento de transacoes, garantindo a consistencia dos dados.
+
+Desvantagens: Em um sistema que envolve dados de variados tipos e objetos aninhados, fica mais complexo a recuperacao de dados utilizando consultas em SQL. Quanto maior a complexidade dos dados, mais complexo e demorado podem se tornar as consultas.
+
+Solucao 2: Banco de dados NoSQL (nao-relacionais)
+
+Banco de dados NoSQL vieram pra revolucionar a forma com que os dados sao gravados, dada a complexidade da estrutura dos dados, surgiu a necessidade de uma solucao em que priorizasse a eficiencia e rapidez na disponibilidade dos mesmos para o sistemas e usuarios.
+
+Banco de dados orientado a documentos armazenam dados de toda uma entidade em um simples documento, nao havendo a necessidade de relacionamento entre eles. Sua estrutura sao definidos em schema JSON.
+
+Exemplo de modelagem em banco de dados NOSQL(orientado a documentos)
+
+
+Beer document
+{
+    "id": 25,
+    "name": "Bad Pixie",
+    "tagline": "Spiced Wheat Beer.",
+    "first_brewed": "10\/2008",
+    "description": "2008 Prototype beer, a 4.7% wheat ale with crushed juniper berries and citrus peel.",
+    "image_url": "https:\/\/images.punkapi.com\/v2\/25.png",
+    "abv": 4.7,
+    "ibu": 45,
+    "target_fg": 1010,
+    "target_og": 1047,
+    "ebc": 8,
+    "srm": 4,
+    "ph": 4.4,
+    "attenuation_level": 79,
+    "volume": {
+      "value": 20,
+      "unit": "liters"
+    },
+    "boil_volume": {
+      "value": 25,
+      "unit": "liters"
+    },
+    "method": {
+      "mash_temp": [
+        {
+          "temp": {
+            "value": 67,
+            "unit": "celsius"
+          },
+          "duration": 75
+        }
+      ],
+      "fermentation": {
+        "temp": {
+          "value": 19,
+          "unit": "celsius"
+        }
+      },
+      "twist": "Crushed juniper berries: 12.5g, Lemon peel: 18.8g"
+    },
+    "ingredients": {
+      "malt": [
+        {
+          "name": "Wheat",
+          "amount": {
+            "value": 2.5,
+            "unit": "kilograms"
+          }
+        },
+        {
+          "name": "Extra Pale",
+          "amount": {
+            "value": 2.06,
+            "unit": "kilograms"
+          }
+        }
+      ],
+      "hops": [
+        {
+          "name": "First Gold",
+          "amount": {
+            "value": 18.75,
+            "unit": "grams"
+          },
+          "add": "start",
+          "attribute": "bitter"
+        },
+        {
+          "name": "First Gold",
+          "amount": {
+            "value": 25,
+            "unit": "grams"
+          },
+          "add": "end",
+          "attribute": "flavour"
+        },
+        {
+          "name": "Sorachi Ace",
+          "amount": {
+            "value": 16.25,
+            "unit": "grams"
+          },
+          "add": "end",
+          "attribute": "flavour"
+        }
+      ],
+      "yeast": "Wyeast 1056 - American Ale\u2122"
+    },
+    "food_pairing": [
+      "Poached sole fillet with capers",
+      "Summer fruit salad",
+      "Banana split"
+    ],
+    "brewers_tips": "Make sure you have plenty of room in the fermenter. Beers containing wheat can often foam aggressively during fermentation.",
+    "contributed_by": "Sam Mason <samjbmason>"
+  } 
+
+VANTAGENS: 
+- Base de dados orientada para objetos flexível;
+- Facilidade em adicionar novos dados, oferencendo uma maior flexibilidade para a gravacao;
+
+
+DESVANTAGENS: 
+- Pela maioria dos sistemas NOSql serem open-source, o suporte nao e gerido por grandes empresas e fabricantes ja consolidadas no mercado, e sim por empresas menores.
+- Falta de padronizacao;
+- A maioria desse tipo de banco nao implementa transacoes ACID;
+
+
+Consideracoes Finais: Analisando bem a fundo e considerando que se trata de um sistema de e-commerce, em  que o rapido acesso e disponibilidade dos dados se tem como prioridade, eu acredito  que o modelo  ideal para esse problema  seria a solucao 2: bancos de dados NOSQL.
+
