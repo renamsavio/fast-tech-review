@@ -1,11 +1,11 @@
-As duas alternativas que escolhi para solucionar esse problema  sao baseadas em dois conceitos:
+As duas alternativas que escolhi para solucionar esse problema são baseadas em dois conceitos:
 
 1 - Banco de dados relacionais (Modelo relacional e EAV(Entity - Attribute - Value)).
-2 - Banco de dados NoSql orientado a documentos (Nao-relacionais).
+2 - Banco de dados NoSql orientado a documentos (Não-relacionais).
 
-Solucao 1:
+Solução 1:
 
- Envolve a criacao de tabelas com colunas fixas (nos quais representariam os atributos de uma entidade). Por exemplo, a criacao da entidade "beer" seria uma tabela principal no qual todas as outras entidades relacionadas a ela seriam tambem representadas por outras tabelas com os seus respectivos atributos.
+ Envolve a criação de tabelas com colunas fixas (nos quais representariam os atributos de uma entidade). Por exemplo, a criação da entidade "beer" seria uma tabela principal no qual todas as outras entidades relacionadas a ela seriam também representadas por outras tabelas com os seus respectivos atributos.
 
 Modelo criado para ilustrar esse relacionamento:
 
@@ -70,9 +70,9 @@ CREATE TABLE public.method_mash_temp
         ON DELETE NO ACTION
 )
 
-Como voce pode visualizar, atraves do esquema de dados do catalogo de cervejas passado, criei algumas tabelas e relacionamentos entre as mesmas, utilizando foreign keys.  Tipos de relacionamento utilizados sao: One to One e One to Many.
+Como você pode visualizar, através do esquema de dados do catálogo de cervejas passado, criei algumas tabelas e relacionamentos entre as mesmas, utilizando foreign keys.  Tipos de relacionamento utilizados são: One to One e One to Many.
 
-Outra abordagem interessante seria o uso do model EAV (Entity - Attribute - Value), no qual criam-se tabelas com um numero menor de colunas, geralmente definindo atributos e seus valores. Por exemplo, a tabela 'method_mash_temp' sob esse modelo seria desenvolvido sob a estrutura abaixo:
+Outra abordagem interessante seria o uso do model EAV (Entity - Attribute - Value), no qual criam-se tabelas com um número menor de colunas, geralmente definindo atributos e seus valores. Por exemplo, a tabela 'method_mash_temp' sob esse modelo seria desenvolvido sob a estrutura abaixo:
 
 Tabela: method_mash_temp
 
@@ -84,7 +84,7 @@ Row3:     3  |1       | twist        |  9
 Row4:     4  |2       | mash_temp    |  9
 Row5:     5  |2       | fermentation |  9
 
-Como pode-se notar, nao sao criados colunas fixas com o nome dos atributos. Em vez disso, cada linha da tabela corresponde a um valor de um atributo daquele objeto beer, permitindo criar colunas dinamicamente sem precisar alterar a estrutura da tabela.
+Como pode-se notar, não são criados colunas fixas com o nome dos atributos. Em vez disso, cada linha da tabela corresponde a um valor de um atributo daquele objeto beer, permitindo criar colunas dinamicamente sem precisar alterar a estrutura da tabela.
 
 Vantagens: Permite multiplos usuarios acessarem um banco de dados simultaneamente. Contem mecanismos de bloqueio e gerenciamento de transacoes, garantindo a consistencia dos dados.
 
@@ -92,9 +92,9 @@ Desvantagens: Em um sistema que envolve dados de variados tipos e objetos aninha
 
 Solucao 2: Banco de dados NoSQL (nao-relacionais)
 
-Banco de dados NoSQL vieram pra revolucionar a forma com que os dados sao gravados, dada a complexidade da estrutura dos dados, surgiu a necessidade de uma solucao em que priorizasse a eficiencia e rapidez na disponibilidade dos mesmos para o sistemas e usuarios.
+Banco de dados NoSQL vieram pra revolucionar a forma com que os dados são gravados, dada a complexidade da estrutura dos dados, surgiu a necessidade de uma solução em que priorizasse a eficiência e rapidez na disponibilidade dos mesmos para o sistemas e usuários.
 
-Banco de dados orientado a documentos armazenam dados de toda uma entidade em um simples documento, nao havendo a necessidade de relacionamento entre eles. Sua estrutura sao definidos em schema JSON.
+Banco de dados orientado a documentos armazenam dados de toda uma entidade em um simples documento, não havendo a necessidade de relacionamento entre eles. Sua estrutura são definidos em schema JSON.
 
 Exemplo de modelagem em banco de dados NOSQL(orientado a documentos)
 
@@ -204,10 +204,10 @@ VANTAGENS:
 
 
 DESVANTAGENS: 
-- Pela maioria dos sistemas NOSql serem open-source, o suporte nao e gerido por grandes empresas e fabricantes ja consolidadas no mercado, e sim por empresas menores.
-- Falta de padronizacao;
-- A maioria desse tipo de banco nao implementa transacoes ACID;
+- Pela maioria dos sistemas NOSql serem open-source, o suporte não é gerido por grandes empresas e fabricantes já consolidadas no mercado, e sim por empresas menores.
+- Falta de padronização;
+- A maioria desses tipos de bancos não implementam transações ACID;
 
 
-Consideracoes Finais: Analisando bem a fundo e considerando que se trata de um sistema de e-commerce, em  que o rapido acesso e disponibilidade dos dados se tem como prioridade, eu acredito  que o modelo  ideal para esse problema  seria a solucao 2: bancos de dados NOSQL.
+Considerações Finais: Analisando bem a fundo e considerando que se trata de um sistema de e-commerce, em  que o rápido acesso e disponibilidade dos dados se tem como prioridade, eu acredito  que o modelo  ideal para esse problema  seria a solução 2: bancos de dados NOSQL.
 
